@@ -11,7 +11,7 @@ import { deepMap } from "./util/util"
 import { GardenBaseError, ConfigurationError } from "./exceptions"
 import { ConfigContext, ContextResolveOpts, ScanContext, ContextResolveOutput } from "./config/config-context"
 import { uniq, isPlainObject, isNumber } from "lodash"
-import { Primitive } from "./config/common"
+import { Primitive, PrimitiveMap } from "./config/common"
 import { profile } from "./util/profiling"
 
 export type StringOrStringPromise = Promise<string> | string
@@ -129,6 +129,10 @@ export function getRuntimeTemplateReferences<T extends object>(obj: T) {
 export function getModuleTemplateReferences<T extends object>(obj: T) {
   const refs = collectTemplateReferences(obj)
   return refs.filter((ref) => ref[0] === "modules" && ref.length > 1)
+}
+
+export function detectMissingSecrets<T extends object>(obj: T, secrets: PrimitiveMap) {
+  const refs = collectTemplateReferences(obj)
 }
 
 function buildBinaryExpression(head: any, tail: any) {
