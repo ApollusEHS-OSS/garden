@@ -30,7 +30,7 @@ import { TaskGraph, TaskResults, ProcessTasksOpts } from "./task-graph"
 import { getLogger } from "./logger/logger"
 import { PluginActionHandlers, GardenPlugin } from "./types/plugin/plugin"
 import { loadConfig, findProjectConfig, prepareModuleResource } from "./config/base"
-import { DeepPrimitiveMap, PrimitiveMap, StringMap } from "./config/common"
+import { DeepPrimitiveMap, StringMap } from "./config/common"
 import { validateSchema } from "./config/validation"
 import { BaseTask } from "./tasks/base"
 import { LocalConfigStore, ConfigStore, GlobalConfigStore } from "./config-store"
@@ -65,6 +65,7 @@ import { readAuthToken, checkClientAuthToken } from "./cloud/auth"
 import { ResolveModuleTask, getResolvedModules } from "./tasks/resolve-module"
 import { getSecrets } from "./cloud/secrets"
 import username from "username"
+import { throwOnMissingSecretKeys } from "./template-string"
 
 export interface ActionHandlerMap<T extends keyof PluginActionHandlers> {
   [actionName: string]: PluginActionHandlers[T]
@@ -525,6 +526,8 @@ export class Garden {
         names = getNames(rawConfigs)
       }
 
+      throwOnMissingSecretKeys(Object.fromEntries(rawConfigs.map((c) => [c.name, c])), this.secrets, "Provider")
+
       // As an optimization, we return immediately if all requested providers are already resolved
       const alreadyResolvedProviders = names.map((name) => this.resolvedProviders[name]).filter(Boolean)
       if (alreadyResolvedProviders.length === names.length) {
@@ -671,10 +674,7 @@ export class Garden {
     const configs = await this.getRawModuleConfigs()
 
     this.log.silly(`Resolving module configs`)
-
-    if (Object.keys(this.secrets).length > 0) {
-      // Gather secret references from project config and raw module configs
-    }
+    throwOnMissingSecretKeys(Object.fromEntries(configs.map((c) => [c.name, c])), this.secrets, "Module")
 
     // Resolve the project module configs
     const tasks = configs.map(

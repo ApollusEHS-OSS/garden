@@ -32,7 +32,7 @@ export async function resolveProjectOutputs(garden: Garden, log: LogEntry): Prom
   let needServices: string[] = []
   let needTasks: string[] = []
 
-  const templateRefs = await collectTemplateReferences(garden.rawOutputs)
+  const templateRefs = collectTemplateReferences(garden.rawOutputs)
 
   if (templateRefs.length === 0) {
     // Nothing to resolve
