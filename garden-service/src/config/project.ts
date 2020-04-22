@@ -279,11 +279,15 @@ export const projectDocsSchema = () =>
         .description("The path to the project config file."),
       name: projectNameSchema(),
       // TODO: Refer to platform documentation for more details.
-      id: joi.string().description("The project's ID in Garden Cloud."),
+      id: joi
+        .string()
+        .meta({ internal: true })
+        .description("The project's ID in Garden Cloud."),
       // TODO: Refer to platform documentation for more details.
       domain: joi
         .string()
-        .description("The domain to use for cloud features. Should point to the API/backend endpoint."),
+        .meta({ internal: true })
+        .description("The domain to use for cloud features. Should point to the API/backend hostname."),
       // Note: We provide a different schema below for actual validation, but need to define it this way for docs
       // because joi.alternatives() isn't handled well in the doc generation.
       environments: joi
